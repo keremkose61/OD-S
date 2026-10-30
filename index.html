@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+  <title>Kaşif Kalkavan Anadolu Lisesi — Okul Düzen, Gözlem ve Rehberlik Portalı</title>
+  <meta name="description" content="Kaşif Kalkavan Anadolu Lisesi — Okul düzeni kuralları, somut davranış gözlemleri, rehberlik sevk takip ve idari disiplin süreçleri portalı.">
+  <meta name="theme-color" content="#0f172a">
+
+  <!-- Apple iOS PWA Meta Tags -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ODİS">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
+
+  <!-- Windows Tile Meta Tags -->
+  <meta name="msapplication-TileColor" content="#0f172a">
+  <meta name="msapplication-TileImage" content="./icons/icon-192.png">
+
+  <!-- Favicon & Manifest -->
+  <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="./icons/favicon-16x16.png">
+  <link rel="icon" type="image/svg+xml" href="./icons/favicon.svg">
+  <link rel="shortcut icon" href="./icons/favicon-32x32.png">
+  <link rel="manifest" href="./manifest.json">
+
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Core Stylesheets -->
+  <link rel="stylesheet" href="./css/reset.css?v=3.5.0">
+  <link rel="stylesheet" href="./css/variables.css?v=3.5.0">
+  <link rel="stylesheet" href="./css/layout.css?v=3.5.0">
+  <link rel="stylesheet" href="./css/components.css?v=3.5.0">
+  <link rel="stylesheet" href="./css/responsive.css?v=3.5.0">
+</head>
+<body>
+  <!-- Connectivity Notifications -->
+  <div id="offline-banner" class="offline-banner">
+    <span>⚠️</span>
+    <span>İnternet bağlantısı yok — Çevrimdışı moddasınız. Kayıtlar yerel olarak IndexedDB'de saklanmaktadır.</span>
+  </div>
+  <div id="online-banner" class="online-banner">
+    <span>✓</span>
+    <span>İnternet bağlantısı yeniden sağlandı.</span>
+  </div>
+
+  <!-- PWA Install Banner -->
+  <div id="pwa-install-banner" class="pwa-install-banner" style="display: none;">
+    <div class="pwa-banner-header">
+      <img src="./icons/icon-192.png" alt="ODİS" class="pwa-banner-icon">
+      <div>
+        <div class="pwa-banner-title">ODİS'i Cihazınıza Yükleyin</div>
+        <div class="pwa-banner-desc">Hızlı erişim, tam ekran deneyim ve çevrimdışı çalışma için ana ekrana ekleyin.</div>
+      </div>
+    </div>
+    <div class="pwa-banner-actions">
+      <button type="button" id="pwa-dismiss-btn" class="btn btn-outline btn-sm">Daha Sonra</button>
+      <button type="button" id="pwa-install-btn" class="btn btn-primary btn-sm">Uygulamayı Kur</button>
+    </div>
+  </div>
+
+  <!-- PWA Update Notification -->
+  <div id="sw-update-banner" class="sw-update-banner" style="display: none;">
+    <span>🚀 Yeni bir ODİS sürümü hazır!</span>
+    <button type="button" id="sw-update-btn" class="btn btn-sm btn-primary">Güncelle ve Yenile</button>
+  </div>
+
+  <!-- Main Single Page Application Container -->
+  <div id="app"></div>
+
+  <!-- QR Scanner Library (Online Camera Support with graceful fallback) -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <!-- SheetJS Library (XLSX / Excel import and export support) -->
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+  <!-- Application Modules -->
+  <script src="./js/database.js"></script>
+  <script src="./js/seed-data.js"></script>
+  <script src="./js/ui.js"></script>
+  <script src="./js/status-engine.js"></script>
+  <script src="./js/auth.js"></script>
+  <script src="./js/schools.js"></script>
+  <script src="./js/students.js"></script>
+  <script src="./js/records.js"></script>
+  <script src="./js/admin-actions.js"></script>
+  <script src="./js/qr-scanner.js"></script>
+  <script src="./js/dashboard.js"></script>
+  <script src="./js/router.js"></script>
+  <script src="./js/counselor.view.js"></script>
+  <script src="./js/admin.view.js"></script>
+  <script src="./js/teacher.view.js"></script>
+  <script src="./js/student.view.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>

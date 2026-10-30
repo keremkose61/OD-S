@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
+  <defs>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="50%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f8fafc" />
+    </linearGradient>
+    <filter id="badgeGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#0f172a" flood-opacity="0.12" />
+    </filter>
+    <style>
+      .card-bg { fill: url(#cardGrad); stroke: #f59e0b; stroke-width: 22; }
+      .amber-wing { fill: url(#amberGrad); }
+      .figure-charcoal { stroke: #27272a; }
+      .head-charcoal { fill: #27272a; }
+      .divider-line { fill: #ffffff; }
+      .halo-ring { stroke: #ffffff; stroke-width: 14; }
+      .accent-pill { fill: url(#amberGrad); }
+
+      @media (prefers-color-scheme: dark) {
+        .card-bg { fill: #0f172a; stroke: #fbbf24; stroke-width: 24; }
+        .figure-charcoal { stroke: #f8fafc; }
+        .head-charcoal { fill: #f8fafc; }
+        .divider-line { fill: #0f172a; }
+        .halo-ring { stroke: #0f172a; stroke-width: 14; }
+        .accent-pill { fill: #fbbf24; }
+      }
+    </style>
+  </defs>
+
+  <!-- Clean Rounded Tab Card (Squircle) with Gold Border & Subtle Depth -->
+  <rect class="card-bg" x="22" y="22" width="456" height="456" rx="105" filter="url(#badgeGlow)" />
+
+  <!-- Centered Scaled Kaşif Kalkavan School Crest -->
+  <g transform="translate(250, 230) scale(1.36) translate(-250, -152.5)">
+    <!-- Amber Wing -->
+    <polygon points="120,86 380,86 250,215" class="amber-wing" />
+
+    <!-- Head -->
+    <circle cx="250" cy="88" r="38" class="head-charcoal" />
+    <circle cx="250" cy="88" r="45" fill="none" class="halo-ring" />
+
+    <!-- Center Divider -->
+    <rect x="238" y="126" width="24" height="134" class="divider-line" />
+
+    <!-- Left 'K' Arms & Legs -->
+    <line x1="225" y1="180" x2="110" y2="108" class="figure-charcoal" stroke-width="42" stroke-linecap="round" />
+    <line x1="225" y1="180" x2="110" y2="242" class="figure-charcoal" stroke-width="42" stroke-linecap="round" />
+    <line x1="216" y1="140" x2="216" y2="244" class="figure-charcoal" stroke-width="34" stroke-linecap="round" />
+
+    <!-- Right 'K' Arms & Legs -->
+    <line x1="275" y1="180" x2="390" y2="108" class="figure-charcoal" stroke-width="42" stroke-linecap="round" />
+    <line x1="275" y1="180" x2="390" y2="242" class="figure-charcoal" stroke-width="42" stroke-linecap="round" />
+    <line x1="284" y1="140" x2="284" y2="244" class="figure-charcoal" stroke-width="34" stroke-linecap="round" />
+  </g>
+
+  <!-- Bottom Elegant Accent Base Bar & Jewel -->
+  <rect class="accent-pill" x="140" y="416" width="220" height="18" rx="9" />
+  <circle class="accent-pill" cx="250" cy="396" r="7" />
+</svg>

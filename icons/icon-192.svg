@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <style>
+      .amber-border { fill: none; stroke: #f59e0b; stroke-width: 6; }
+      .amber-fill { fill: #f59e0b; }
+      .charcoal-fill { fill: #3f3f46; }
+    </style>
+  </defs>
+
+  <rect width="192" height="192" rx="36" fill="#ffffff" />
+  <rect x="8" y="8" width="176" height="176" rx="30" class="amber-border" />
+
+  <!-- Background Amber Wing -->
+  <polygon points="46,38 146,38 96,88" class="amber-fill" />
+
+  <!-- Head -->
+  <circle cx="96" cy="38" r="16" class="charcoal-fill" />
+  <circle cx="96" cy="38" r="18" fill="none" stroke="#ffffff" stroke-width="5" />
+
+  <!-- Left 'K' -->
+  <line x1="86" y1="74" x2="42" y2="46" stroke="#3f3f46" stroke-width="15" stroke-linecap="round" />
+  <line x1="86" y1="74" x2="42" y2="98" stroke="#3f3f46" stroke-width="15" stroke-linecap="round" />
+  <line x1="83" y1="58" x2="83" y2="100" stroke="#3f3f46" stroke-width="13" stroke-linecap="round" />
+
+  <!-- Right 'K' -->
+  <line x1="106" y1="74" x2="150" y2="46" stroke="#3f3f46" stroke-width="15" stroke-linecap="round" />
+  <line x1="106" y1="74" x2="150" y2="98" stroke="#3f3f46" stroke-width="15" stroke-linecap="round" />
+  <line x1="109" y1="58" x2="109" y2="100" stroke="#3f3f46" stroke-width="13" stroke-linecap="round" />
+
+  <!-- Center divider gap -->
+  <rect x="91" y="54" width="10" height="52" fill="#ffffff" />
+
+  <!-- Text: KAŞİF -->
+  <text x="96" y="132" font-family="'Plus Jakarta Sans', sans-serif" font-size="16" font-weight="700" fill="#3f3f46" letter-spacing="7" text-anchor="middle">KAŞİF</text>
+  <line x1="28" y1="139" x2="164" y2="139" stroke="#f59e0b" stroke-width="3" />
+
+  <!-- Text: KALKAVAN -->
+  <text x="96" y="157" font-family="'Plus Jakarta Sans', sans-serif" font-size="16" font-weight="800" fill="#3f3f46" letter-spacing="3.5" text-anchor="middle">KALKAVAN</text>
+
+  <!-- Text: Anadolu Lisesi -->
+  <text x="96" y="172" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600" fill="#3f3f46" letter-spacing="1" text-anchor="middle">Anadolu Lisesi</text>
+</svg>
