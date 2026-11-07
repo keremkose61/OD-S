@@ -549,7 +549,7 @@ async function getActiveSupportCasesWithStudents(schoolId = Auth.getCurrentSchoo
 }
 
 async function updateSupportCaseStatus(id, newStatus, newNotes = '', options = {}) {
-  const sc = await Database.get(Database.STORES.SUPPORT_CASES, id);
+  let sc = await Database.get(Database.STORES.SUPPORT_CASES, id);
   if (!sc || !Auth.getCurrentSchoolId() || sc.schoolId !== Auth.getCurrentSchoolId()) {
     throw new Error('Destek vakası bulunamadı veya bu okul için erişim yetkiniz yok.');
   }
