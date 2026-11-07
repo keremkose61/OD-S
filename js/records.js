@@ -528,6 +528,10 @@ async function getAllSupportCases(filters = {}) {
     cases = cases.filter(c => c.academicYearId === academicYearId);
   }
   cases.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+  // Private counseling notes are only included in counselor-facing results.
+  if (!Auth.canViewPrivateCounselingNotes()) {
+    cases = cases.map(({ privateNotes, ...safeCase }) => safeCase);
+  }
   return cases;
 }
 
@@ -568,6 +572,11 @@ async function updateSupportCaseStatus(id, newStatus, newNotes = '', options = {
   sc.updatedAt = new Date().toISOString();
 
   await Database.put(Database.STORES.SUPPORT_CASES, sc);
+
+  if (!Auth.canViewPrivateCounselingNotes()) {
+    const { privateNotes, ...safeCase } = sc;
+    sc = safeCase;
+  }
 
   if (window.Audit) {
     // PDF Sayfa 10: Rehberlik özel notunun içeriği audit kaydına kopyalanmaz.
