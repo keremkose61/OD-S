@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    UNIQUE KEY uq_users_school_username (school_id, username),
+    UNIQUE KEY uq_users_username (username),
     KEY idx_users_school_role (school_id, role),
     CONSTRAINT fk_users_school FOREIGN KEY (school_id) REFERENCES schools(id)
         ON UPDATE CASCADE ON DELETE RESTRICT
