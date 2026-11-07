@@ -16,7 +16,7 @@ Bu dizin, ODİS'in tarayıcıdaki demo kimlik doğrulamasını sunucu tarafına 
 3. `backend/database/schema.sql` dosyasını `odis` veritabanına içe aktarın.
 4. `backend/config/config.example.php` dosyasını aynı klasörde `config.local.php` adıyla kopyalayın.
 5. `config.local.php` içindeki MySQL kullanıcı adı ve parolasını kendi WampServer kurulumunuza göre düzenleyin.
-6. Proje kökünü Apache'nin web kökünde yayınlayın. Örnek: `C:\\wamp64\\www\\odis`.
+6. Proje kökünü Apache'nin web kökünde yayınlayın. Örnek: `C:\\wamp64\\www\\odis`. Apache yapılandırmasında proje klasörü için `.htaccess` kullanımına (`AllowOverride All`) izin verildiğini doğrulayın.
 7. İlk yönetici hesabını yalnızca sunucuda PHP CLI üzerinden oluşturun:
 
 ```bat
@@ -28,6 +28,7 @@ Komut sizden parola isteyecektir. Gerçek hesap parolalarını kaynak koda veya 
 
 ## API uçları
 
+- `GET /backend/api/health.php` — backend ve veritabanı bağlantısını kontrol eder.
 - `GET /backend/api/auth/csrf.php` — oturum ve CSRF belirteci oluşturur.
 - `POST /backend/api/auth/login.php` — kullanıcı adı/parola ile oturum açar.
 - `GET /backend/api/auth/me.php` — geçerli sunucu oturumunu döndürür.
