@@ -163,7 +163,13 @@ async function getStudentWithStats(studentId, academicYearId = null) {
   // IndexedDB indexes are not authorization boundaries; verify school ownership.
   const scopedRecords = allRecords.filter(item => item.schoolId === schoolId);
   const scopedObservations = observations.filter(item => item.schoolId === schoolId);
-  const scopedSupportCases = supportCases.filter(item => item.schoolId === schoolId);
+  const scopedSupportCases = supportCases
+    .filter(item => item.schoolId === schoolId)
+    .map(item => {
+      if (Auth.canViewPrivateCounselingNotes()) return item;
+      const { privateNotes, ...safeCase } = item;
+      return safeCase;
+    });
   const scopedActions = actions.filter(item => item.schoolId === schoolId);
 
   // Sort descending by date
