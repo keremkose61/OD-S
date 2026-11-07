@@ -24,3 +24,6 @@ desktop.ini
 *.tmp
 *.temp
 scratch/
+
+# ODİS local backend secrets
+backend/config/config.local.php
