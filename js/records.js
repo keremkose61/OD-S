@@ -123,7 +123,9 @@ async function createBatchOrderRecords(data) {
  */
 async function requestRecordCancellation(recordId, reason, requestedBy = Auth.getDisplayName()) {
   const record = await Database.get(Database.STORES.ORDER_RECORDS, recordId);
-  if (!record) throw new Error('Kayıt bulunamadı.');
+  if (!record || !Auth.getCurrentSchoolId() || record.schoolId !== Auth.getCurrentSchoolId()) {
+    throw new Error('Kayıt bulunamadı veya bu okul için erişim yetkiniz yok.');
+  }
 
   record.status = 'cancellation_requested';
   record.cancellationRequest = {
@@ -153,7 +155,9 @@ async function requestRecordCancellation(recordId, reason, requestedBy = Auth.ge
  */
 async function reviewRecordCancellation(recordId, approve, notes = '', adminName = Auth.getDisplayName()) {
   const record = await Database.get(Database.STORES.ORDER_RECORDS, recordId);
-  if (!record) throw new Error('Kayıt bulunamadı.');
+  if (!record || !Auth.getCurrentSchoolId() || record.schoolId !== Auth.getCurrentSchoolId()) {
+    throw new Error('Kayıt bulunamadı veya bu okul için erişim yetkiniz yok.');
+  }
 
   const decision = approve ? 'approved' : 'rejected';
   record.status = approve ? 'cancelled' : 'active';
@@ -291,10 +295,12 @@ async function getAllOrderRecords(filters = {}) {
   return records;
 }
 
-async function getStudentOrderRecords(studentId) {
+async function getStudentOrderRecords(studentId, schoolId = Auth.getCurrentSchoolId()) {
+  if (!schoolId) return [];
   const records = await Database.getByIndex(Database.STORES.ORDER_RECORDS, 'studentId', studentId);
-  records.sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
-  return records;
+  const scopedRecords = records.filter(record => record.schoolId === schoolId);
+  scopedRecords.sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
+  return scopedRecords;
 }
 
 async function getTodayOrderCount(schoolId = Auth.getCurrentSchoolId()) {
@@ -522,6 +528,10 @@ async function getAllSupportCases(filters = {}) {
     cases = cases.filter(c => c.academicYearId === academicYearId);
   }
   cases.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+  // Private counseling notes are only included in counselor-facing results.
+  if (!Auth.canViewPrivateCounselingNotes()) {
+    cases = cases.map(({ privateNotes, ...safeCase }) => safeCase);
+  }
   return cases;
 }
 
@@ -539,13 +549,16 @@ async function getActiveSupportCasesWithStudents(schoolId = Auth.getCurrentSchoo
 }
 
 async function updateSupportCaseStatus(id, newStatus, newNotes = '', options = {}) {
-  const sc = await Database.get(Database.STORES.SUPPORT_CASES, id);
-  if (!sc) throw new Error('Destek vakası bulunamadı.');
+  let sc = await Database.get(Database.STORES.SUPPORT_CASES, id);
+  if (!sc || !Auth.getCurrentSchoolId() || sc.schoolId !== Auth.getCurrentSchoolId()) {
+    throw new Error('Destek vakası bulunamadı veya bu okul için erişim yetkiniz yok.');
+  }
 
   sc.status = newStatus;
   if (typeof newNotes === 'string' && newNotes) {
+    // Administrative feedback belongs in the administrative notes only.
+    // Never duplicate it into the counselor-only privateNotes field.
     sc.notes = (sc.notes ? sc.notes + '\n\n' : '') + `[${new Date().toLocaleDateString('tr-TR')} - İdari Geri Bildirim]: ${newNotes}`;
-    sc.privateNotes = (sc.privateNotes ? sc.privateNotes + '\n\n' : '') + `[${new Date().toLocaleDateString('tr-TR')}]: ${newNotes}`;
   }
   if (options.adminResultNote) {
     sc.adminResultNote = options.adminResultNote;
@@ -559,6 +572,11 @@ async function updateSupportCaseStatus(id, newStatus, newNotes = '', options = {
   sc.updatedAt = new Date().toISOString();
 
   await Database.put(Database.STORES.SUPPORT_CASES, sc);
+
+  if (!Auth.canViewPrivateCounselingNotes()) {
+    const { privateNotes, ...safeCase } = sc;
+    sc = safeCase;
+  }
 
   if (window.Audit) {
     // PDF Sayfa 10: Rehberlik özel notunun içeriği audit kaydına kopyalanmaz.
