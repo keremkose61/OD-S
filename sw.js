@@ -3,7 +3,7 @@
    Progressive Web App (PWA) Offline Engine
    ======================================== */
 
-const CACHE_VERSION = 'odis-v3.5.0';
+const CACHE_VERSION = 'odis-v3.6.0';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
@@ -96,6 +96,10 @@ self.addEventListener('fetch', (event) => {
   if (!request.url.startsWith('http')) return;
 
   const url = new URL(request.url);
+
+  // Authentication and API responses are private and must always use the network.
+  // Never put user/session-specific responses into a shared service-worker cache.
+  if (url.pathname.includes('/backend/api/')) return;
 
   // Strategy 1: External CDN assets (Google Fonts, SheetJS, QR code)
   // Cache First with Runtime Cache fallback
