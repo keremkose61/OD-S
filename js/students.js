@@ -182,8 +182,8 @@ async function getStudentWithStats(studentId, academicYearId = null) {
 
   // Stats for the active/selected academic year
   const totalRecords = filteredRecords.length;
-  const totalObservations = observations.length;
-  const activeSupportCases = supportCases.filter(sc => sc.status !== 'closed' && sc.status !== 'unconfirmed');
+  const totalObservations = scopedObservations.length;
+  const activeSupportCases = scopedSupportCases.filter(sc => sc.status !== 'closed' && sc.status !== 'unconfirmed');
   const last30Days = filteredRecords.filter(r => UI.isWithinDays(r.dateTime, 30)).length;
   const lastRecordDate = filteredRecords.length > 0 ? filteredRecords[0].dateTime : null;
 
@@ -198,7 +198,7 @@ async function getStudentWithStats(studentId, academicYearId = null) {
 
   // Calculate Status via StatusEngine (PDF Section 3 & 4: 🟢 🟠 🔴)
   const status = window.StatusEngine
-    ? window.StatusEngine.calculateStatus(filteredRecords, actions, { schoolId })
+    ? window.StatusEngine.calculateStatus(filteredRecords, scopedActions, { schoolId })
     : { level: 'green', label: 'Normal Takip', icon: '🟢', reasons: [] };
 
   return {
@@ -214,7 +214,7 @@ async function getStudentWithStats(studentId, academicYearId = null) {
     stats: {
       totalRecords: filteredRecords.filter(r => r.status !== 'cancelled').length,
       rawRecordsCount: filteredRecords.length,
-      allTimeRecords: allRecords.filter(r => r.status !== 'cancelled').length,
+      allTimeRecords: scopedRecords.filter(r => r.status !== 'cancelled').length,
       pastRecordsCount: pastRecords.filter(r => r.status !== 'cancelled').length,
       totalObservations,
       activeSupportCount: activeSupportCases.length,
