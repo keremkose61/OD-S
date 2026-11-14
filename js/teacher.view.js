@@ -214,7 +214,7 @@ function renderLoginScreen() {
   });
 
   // Form submit
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const username = usernameInput.value.trim();
     const password = passwordInput.value;
@@ -225,21 +225,37 @@ function renderLoginScreen() {
       return;
     }
 
-    const user = Auth.login(username, password);
-    if (user) {
-      UI.showToast(`Hoş geldiniz, ${user.displayName}!`, 'success');
-      if (user.role === 'admin') {
-        Router.navigate(Router.ROUTES.ADMIN_DASHBOARD);
-      } else if (user.role === 'counselor') {
-        Router.navigate(Router.ROUTES.COUNSELOR_DASHBOARD);
+    const submitBtn = document.getElementById('login-btn');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Giriş yapılıyor...';
+    }
+
+    try {
+      const user = await Auth.login(username, password);
+      if (user && !user.error && user.role) {
+        UI.showToast(`Hoş geldiniz, ${user.displayName}!`, 'success');
+        if (user.role === 'admin') {
+          Router.navigate(Router.ROUTES.ADMIN_DASHBOARD);
+        } else if (user.role === 'counselor') {
+          Router.navigate(Router.ROUTES.COUNSELOR_DASHBOARD);
+        } else {
+          Router.navigate(Router.ROUTES.TEACHER_HOME);
+        }
       } else {
-        Router.navigate(Router.ROUTES.TEACHER_HOME);
+        errorDiv.textContent = (user && user.error) ? user.error : 'Kullanıcı adı veya şifre hatalı.';
+        errorDiv.classList.add('visible');
+        passwordInput.value = '';
+        passwordInput.focus();
       }
-    } else {
-      errorDiv.textContent = 'Kullanıcı adı veya şifre hatalı.';
+    } catch (err) {
+      errorDiv.textContent = 'Giriş işlemi sırasında bir hata oluştu.';
       errorDiv.classList.add('visible');
-      passwordInput.value = '';
-      passwordInput.focus();
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `${UI.Icons.logIn} Sisteme Giriş Yap`;
+      }
     }
   });
 }

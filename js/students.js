@@ -14,8 +14,11 @@ async function getAllStudents(schoolId = Auth.getCurrentSchoolId()) {
 /**
  * Get a student by ID.
  */
-async function getStudentById(id) {
-  return Database.get(Database.STORES.STUDENTS, id);
+async function getStudentById(id, schoolId = Auth.getCurrentSchoolId()) {
+  const student = await Database.get(Database.STORES.STUDENTS, id);
+  // Fail closed: a missing school context must never expose cross-school data.
+  if (!student || !schoolId || student.schoolId !== schoolId) return null;
+  return student;
 }
 
 /**
@@ -114,6 +117,9 @@ async function updateStudent(id, updates) {
   const updated = {
     ...existing,
     ...updates,
+    // A client-side update must not be able to move a student to another school.
+    id: existing.id,
+    schoolId: existing.schoolId,
     updatedAt: new Date().toISOString(),
   };
 
@@ -154,24 +160,36 @@ async function getStudentWithStats(studentId, academicYearId = null) {
     Database.getByIndex(Database.STORES.ACTIONS, 'studentId', studentId),
   ]);
 
+  // IndexedDB indexes are not authorization boundaries; verify school ownership.
+  const scopedRecords = allRecords.filter(item => item.schoolId === schoolId);
+  const scopedObservations = observations.filter(item => item.schoolId === schoolId);
+  const scopedSupportCases = supportCases
+    .filter(item => item.schoolId === schoolId)
+    .map(item => {
+      if (Auth.canViewPrivateCounselingNotes()) return item;
+      const { privateNotes, ...safeCase } = item;
+      return safeCase;
+    });
+  const scopedActions = actions.filter(item => item.schoolId === schoolId);
+
   // Sort descending by date
-  allRecords.sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
-  observations.sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
-  supportCases.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-  actions.sort((a, b) => new Date(b.date) - new Date(a.date));
+  scopedRecords.sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
+  scopedObservations.sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
+  scopedSupportCases.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+  scopedActions.sort((a, b) => new Date(b.date) - new Date(a.date));
 
   // Determine active vs past records based on targetYearId
-  let filteredRecords = allRecords;
+  let filteredRecords = scopedRecords;
   let pastRecords = [];
   if (targetYearId && targetYearId !== 'all') {
-    filteredRecords = allRecords.filter(r => r.academicYearId === targetYearId);
-    pastRecords = allRecords.filter(r => r.academicYearId !== targetYearId);
+    filteredRecords = scopedRecords.filter(r => r.academicYearId === targetYearId);
+    pastRecords = scopedRecords.filter(r => r.academicYearId !== targetYearId);
   }
 
   // Stats for the active/selected academic year
   const totalRecords = filteredRecords.length;
-  const totalObservations = observations.length;
-  const activeSupportCases = supportCases.filter(sc => sc.status !== 'closed' && sc.status !== 'unconfirmed');
+  const totalObservations = scopedObservations.length;
+  const activeSupportCases = scopedSupportCases.filter(sc => sc.status !== 'closed' && sc.status !== 'unconfirmed');
   const last30Days = filteredRecords.filter(r => UI.isWithinDays(r.dateTime, 30)).length;
   const lastRecordDate = filteredRecords.length > 0 ? filteredRecords[0].dateTime : null;
 
@@ -186,23 +204,23 @@ async function getStudentWithStats(studentId, academicYearId = null) {
 
   // Calculate Status via StatusEngine (PDF Section 3 & 4: 🟢 🟠 🔴)
   const status = window.StatusEngine
-    ? window.StatusEngine.calculateStatus(filteredRecords, actions, { schoolId })
+    ? window.StatusEngine.calculateStatus(filteredRecords, scopedActions, { schoolId })
     : { level: 'green', label: 'Normal Takip', icon: '🟢', reasons: [] };
 
   return {
     ...student,
     records: filteredRecords,
-    allRecords,
+    allRecords: scopedRecords,
     pastRecords,
     activeYearId: targetYearId,
     status,
-    observations,
-    supportCases,
-    actions,
+    observations: scopedObservations,
+    supportCases: scopedSupportCases,
+    actions: scopedActions,
     stats: {
       totalRecords: filteredRecords.filter(r => r.status !== 'cancelled').length,
       rawRecordsCount: filteredRecords.length,
-      allTimeRecords: allRecords.filter(r => r.status !== 'cancelled').length,
+      allTimeRecords: scopedRecords.filter(r => r.status !== 'cancelled').length,
       pastRecordsCount: pastRecords.filter(r => r.status !== 'cancelled').length,
       totalObservations,
       activeSupportCount: activeSupportCases.length,

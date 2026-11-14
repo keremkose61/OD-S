@@ -52,10 +52,12 @@ async function getAllActions(schoolId = Auth.getCurrentSchoolId()) {
 /**
  * Get actions for a specific student.
  */
-async function getStudentActions(studentId) {
+async function getStudentActions(studentId, schoolId = Auth.getCurrentSchoolId()) {
+  if (!schoolId) return [];
   const actions = await Database.getByIndex(Database.STORES.ACTIONS, 'studentId', studentId);
-  actions.sort((a, b) => new Date(b.date) - new Date(a.date));
-  return actions;
+  const scopedActions = actions.filter(action => action.schoolId === schoolId);
+  scopedActions.sort((a, b) => new Date(b.date) - new Date(a.date));
+  return scopedActions;
 }
 
 /**

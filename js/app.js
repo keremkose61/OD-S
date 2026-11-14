@@ -1,5 +1,5 @@
 /* ========================================
-   ODİS v3 — Main Application Orchestrator
+   ODİS v4 — Main Application Orchestrator
    Modular School Order, Behavioral Observations,
    and Counseling Support Portal.
    ======================================== */
@@ -14,26 +14,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     await Database.open();
 
     // 2. Seed demo data (first run or v4 upgrade)
+    //    NOTE: SeedData.seed() checks an internal flag and runs only once.
+    //    Disable this call after full MySQL migration is complete.
     await SeedData.seed();
 
     // 3. Initialize toast notification container
     UI.initToasts();
 
-    // 4. Initialize client-side router
+    // 4. Check server-side session (PHP backend).
+    //    Auth.initSession() calls /backend/api/auth/me.php.
+    //    If the backend is unreachable, the app continues in offline (IndexedDB) mode.
+    await Auth.initSession();
+
+    // 5. Initialize client-side router (uses Auth.isLoggedIn() for routing)
     Router.init();
 
-    // 5. Connectivity detection
+    // 6. Connectivity detection
     setupConnectivityDetection();
 
-    // 6. Service worker registration & update management
+    // 7. Service worker registration & update management
     registerServiceWorker();
 
-    // 7. PWA install prompt & lifecycle handlers
+    // 8. PWA install prompt & lifecycle handlers
     setupPwaInstall();
 
-    console.log('[ODİS v3] Uygulama başarıyla başlatıldı.');
+    console.log('[ODİS v4] Uygulama başarıyla başlatıldı.');
   } catch (error) {
-    console.error('[ODİS v3] Başlatma hatası:', error);
+    console.error('[ODİS v4] Başlatma hatası:', error);
     document.getElementById('app').innerHTML = `
       <div class="login-layout">
         <div class="login-card" style="text-align:center;padding:var(--space-2xl)">
@@ -238,8 +245,8 @@ function showIosInstallInstructions() {
       </div>
       <ol style="padding-left:20px;font-size:14px;color:var(--text-primary);display:flex;flex-direction:column;gap:10px">
         <li>Safari tarayıcısının alt kısmındaki <strong>Paylaş</strong> simgesine (<span style="font-size:16px">📤</span>) dokunun.</li>
-        <li>Açılan menüde aşağı kaydırarak <strong>“Ana Ekrana Ekle”</strong> (Add to Home Screen) seçeneğini seçin.</li>
-        <li>Sağ üst köşedeki <strong>“Ekle”</strong> butonuna dokunun.</li>
+        <li>Açılan menüde aşağı kaydırarak <strong>"Ana Ekrana Ekle"</strong> (Add to Home Screen) seçeneğini seçin.</li>
+        <li>Sağ üst köşedeki <strong>"Ekle"</strong> butonuna dokunun.</li>
       </ol>
       <div style="margin-top:var(--space-md);background:var(--bg-tertiary);padding:10px 14px;border-radius:var(--radius-sm);font-size:12px;color:var(--text-secondary)">
         💡 Bu işlem sonrasında ODİS, telefonunuzda yerel bir mobil uygulama gibi tam ekran çalışır.
