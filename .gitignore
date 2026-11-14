@@ -25,5 +25,20 @@ desktop.ini
 *.temp
 scratch/
 
-# ODİS local backend secrets
+# ODİS local backend secrets & overrides
 backend/config/config.local.php
+backend/config/config.test.php
+config.local.php
+config.test.php
+
+# Local databases and runtime data
+data/
+*.sqlite
+*.sqlite3
+*.db
+*.bak
+*.backup
+backups/
+staging/
+*.sql.gz
+dump*.sql

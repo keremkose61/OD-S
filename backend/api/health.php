@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../src/http.php';
-require_once __DIR__ . '/../../src/Database.php';
+require_once __DIR__ . '/../src/http.php';
+require_once __DIR__ . '/../src/Database.php';
 
 require_method('GET');
 
 try {
-    $config = require __DIR__ . '/../../config/config.php';
+    $config = require __DIR__ . '/../config/config.php';
     Database::connection($config)->query('SELECT 1');
     json_response([
         'status' => 'ok',

@@ -556,9 +556,16 @@ async function updateSupportCaseStatus(id, newStatus, newNotes = '', options = {
 
   sc.status = newStatus;
   if (typeof newNotes === 'string' && newNotes) {
-    // Administrative feedback belongs in the administrative notes only.
-    // Never duplicate it into the counselor-only privateNotes field.
-    sc.notes = (sc.notes ? sc.notes + '\n\n' : '') + `[${new Date().toLocaleDateString('tr-TR')} - İdari Geri Bildirim]: ${newNotes}`;
+    if (options.adminResultNote) {
+      sc.privateNotes = (sc.privateNotes ? sc.privateNotes + '\n\n' : '') + `[${new Date().toLocaleDateString('tr-TR')}]: ${newNotes}`;
+      sc.notes = (sc.notes ? sc.notes + '\n\n' : '') + `[${new Date().toLocaleDateString('tr-TR')} - İdari Geri Bildirim]: ${options.adminResultNote}`;
+    } else {
+      sc.notes = (sc.notes ? sc.notes + '\n\n' : '') + `[${new Date().toLocaleDateString('tr-TR')} - İdari Geri Bildirim]: ${newNotes}`;
+    }
+  }
+  if (options.privateNotes || options.privateNote) {
+    const pNote = options.privateNotes || options.privateNote;
+    sc.privateNotes = (sc.privateNotes ? sc.privateNotes + '\n\n' : '') + `[${new Date().toLocaleDateString('tr-TR')}]: ${pNote}`;
   }
   if (options.adminResultNote) {
     sc.adminResultNote = options.adminResultNote;

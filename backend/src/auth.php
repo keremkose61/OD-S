@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+/**
+ * Returns current authenticated user record, strictly verified against the database.
+ * Re-validates active status of both user and their school on every request.
+ */
 function current_user(PDO $pdo): ?array
 {
     $userId = $_SESSION['user_id'] ?? null;
@@ -25,15 +29,18 @@ function current_user(PDO $pdo): ?array
     }
 
     return [
-        'id' => (int) $user['id'],
-        'username' => $user['username'],
+        'id'          => (int) $user['id'],
+        'username'    => $user['username'],
         'displayName' => $user['display_name'],
-        'role' => $user['role'],
-        'schoolId' => $user['school_id'],
-        'schoolName' => $user['school_name'],
+        'role'        => $user['role'],
+        'schoolId'    => $user['school_id'],
+        'schoolName'  => $user['school_name'],
     ];
 }
 
+/**
+ * Requires a valid authenticated session. Exits with 401 if not authenticated.
+ */
 function require_user(PDO $pdo): array
 {
     $user = current_user($pdo);
@@ -43,6 +50,9 @@ function require_user(PDO $pdo): array
     return $user;
 }
 
+/**
+ * Enforces role-based access control. Exits with 403 if user lacks required role.
+ */
 function require_role(array $user, array $roles): void
 {
     if (!in_array($user['role'], $roles, true)) {
@@ -50,19 +60,43 @@ function require_role(array $user, array $roles): void
     }
 }
 
-function write_audit(PDO $pdo, array $user, string $action, ?string $entityType = null, ?string $entityId = null): void
+/**
+ * Confidentiality guard: ONLY counselors are permitted to view or write
+ * clinical and private counseling notes.
+ */
+function can_view_counseling_notes(array $user): bool
 {
+    return ($user['role'] ?? '') === 'counselor';
+}
+
+/**
+ * Logs an administrative or security audit event scoped to user's school.
+ */
+function write_audit(
+    PDO $pdo,
+    array $user,
+    string $action,
+    ?string $entityType = null,
+    ?string $entityId = null,
+    $details = null
+): void {
+    $detailsJson = null;
+    if ($details !== null) {
+        $detailsJson = is_string($details) ? json_encode(['message' => $details], JSON_UNESCAPED_UNICODE) : json_encode($details, JSON_UNESCAPED_UNICODE);
+    }
+
     $stmt = $pdo->prepare(
-        'INSERT INTO audit_logs (school_id, user_id, action, entity_type, entity_id, ip_address, user_agent)
-         VALUES (:school_id, :user_id, :action, :entity_type, :entity_id, :ip, :agent)'
+        'INSERT INTO audit_logs (school_id, user_id, action, entity_type, entity_id, ip_address, user_agent, details)
+         VALUES (:school_id, :user_id, :action, :entity_type, :entity_id, :ip, :agent, :details)'
     );
     $stmt->execute([
-        'school_id' => $user['schoolId'],
-        'user_id' => $user['id'],
-        'action' => $action,
+        'school_id'   => $user['schoolId'],
+        'user_id'     => $user['id'],
+        'action'      => $action,
         'entity_type' => $entityType,
-        'entity_id' => $entityId,
-        'ip' => $_SERVER['REMOTE_ADDR'] ?? null,
-        'agent' => substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 255),
+        'entity_id'   => $entityId,
+        'ip'          => $_SERVER['REMOTE_ADDR'] ?? null,
+        'agent'       => substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 255),
+        'details'     => $detailsJson,
     ]);
 }

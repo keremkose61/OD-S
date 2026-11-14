@@ -14,7 +14,7 @@ const assets = match[1]
 
 let missing = 0;
 for (const a of assets) {
-  let p = a.replace(/^\.\//, '');
+  let p = a.replace(/^\.\//, '').split('?')[0];
   if (p === '') p = 'index.html';
   if (!fs.existsSync(p)) {
     console.error('EKSİK DOSYA:', a);

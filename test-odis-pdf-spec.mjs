@@ -374,7 +374,7 @@ async function runPdfSpecTests() {
   await Records.create({
     studentId: scenarioStudent.id,
     category: 'arma',
-    dateTime: '2026-10-01T08:15:00Z',
+    dateTime: new Date(Date.now() - 12 * 86400000).toISOString(),
     createdBy: 'Öğretmen 1',
     schoolId,
     academicYearId,
@@ -386,7 +386,7 @@ async function runPdfSpecTests() {
   await Records.create({
     studentId: scenarioStudent.id,
     category: 'arma',
-    dateTime: '2026-10-08T08:20:00Z',
+    dateTime: new Date(Date.now() - 7 * 86400000).toISOString(),
     createdBy: 'Öğretmen 2',
     schoolId,
     academicYearId,
@@ -396,7 +396,7 @@ async function runPdfSpecTests() {
   await Records.create({
     studentId: scenarioStudent.id,
     category: 'arma',
-    dateTime: '2026-10-12T08:10:00Z',
+    dateTime: new Date(Date.now() - 4 * 86400000).toISOString(),
     createdBy: 'Öğretmen 3',
     schoolId,
     academicYearId,
@@ -408,7 +408,7 @@ async function runPdfSpecTests() {
   await Records.create({
     studentId: scenarioStudent.id,
     category: 'arma',
-    dateTime: '2026-10-15T08:25:00Z',
+    dateTime: new Date(Date.now() - 2 * 86400000).toISOString(),
     createdBy: 'Öğretmen 1',
     schoolId,
     academicYearId,
@@ -416,7 +416,7 @@ async function runPdfSpecTests() {
   await Records.create({
     studentId: scenarioStudent.id,
     category: 'arma',
-    dateTime: '2026-10-18T08:30:00Z',
+    dateTime: new Date(Date.now() - 1 * 86400000).toISOString(),
     createdBy: 'Öğretmen 4',
     schoolId,
     academicYearId,

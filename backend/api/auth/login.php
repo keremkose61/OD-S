@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../src/auth.php';
 require_method('POST');
 require_csrf();
 
-$input = request_json();
+$input    = request_json();
 $username = strtolower(trim((string) ($input['username'] ?? '')));
 $password = (string) ($input['password'] ?? '');
 
@@ -16,8 +16,10 @@ if ($username === '' || $password === '' || strlen($username) > 80 || strlen($pa
 }
 
 $usernameKey = hash('sha256', $username);
-$ip = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+$ip          = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
 
+// ── Brute-force protection ────────────────────────────────────────────────────
+// Clean up attempts older than 24 hours
 $cleanup = $pdo->prepare('DELETE FROM login_attempts WHERE attempted_at < (NOW() - INTERVAL 1 DAY)');
 $cleanup->execute();
 
@@ -31,33 +33,56 @@ if ((int) $rate->fetchColumn() >= 5) {
     json_response(['error' => 'Çok fazla başarısız giriş denemesi. 15 dakika sonra tekrar deneyin.'], 429);
 }
 
+// ── Credential lookup ─────────────────────────────────────────────────────────
+// username is unique per school, but we look up by username alone since the
+// user does not know their school_id at login time.
+// If two schools share the same username for different staff members this
+// query returns the first match; in practice school-prefixed usernames prevent
+// this (e.g. "kasif_ali" vs "afl_ali").
 $stmt = $pdo->prepare(
     'SELECT u.id, u.username, u.password_hash, u.active, u.school_id
-     FROM users u INNER JOIN schools s ON s.id = u.school_id
-     WHERE u.username = :username AND s.active = 1 LIMIT 1'
+     FROM users u
+     INNER JOIN schools s ON s.id = u.school_id
+     WHERE u.username = :username AND s.active = 1
+     LIMIT 1'
 );
 $stmt->execute(['username' => $username]);
 $account = $stmt->fetch();
 
 if (!$account || !(bool) $account['active'] || !password_verify($password, $account['password_hash'])) {
-    $attempt = $pdo->prepare('INSERT INTO login_attempts (username_key, ip_address) VALUES (:username_key, :ip)');
-    $attempt->execute(['username_key' => $usernameKey, 'ip' => $ip]);
+    // Record failed attempt
+    $attempt = $pdo->prepare(
+        'INSERT INTO login_attempts (username_key, ip_address, school_id) VALUES (:username_key, :ip, :school_id)'
+    );
+    $attempt->execute([
+        'username_key' => $usernameKey,
+        'ip'           => $ip,
+        'school_id'    => $account['school_id'] ?? null,
+    ]);
+    // Generic error — do not reveal whether the username exists
     json_response(['error' => 'Kullanıcı adı veya parola hatalı.'], 401);
 }
 
+// ── Successful login ──────────────────────────────────────────────────────────
+// Regenerate session to prevent fixation
 session_regenerate_id(true);
 $_SESSION = [
-    'user_id' => (int) $account['id'],
+    'user_id'       => (int) $account['id'],
     'last_activity' => time(),
-    'csrf_token' => bin2hex(random_bytes(32)),
+    'csrf_token'    => bin2hex(random_bytes(32)),
 ];
 
-$clear = $pdo->prepare('DELETE FROM login_attempts WHERE username_key = :username_key AND ip_address = :ip');
+// Clear brute-force records for this user+IP combo
+$clear = $pdo->prepare(
+    'DELETE FROM login_attempts WHERE username_key = :username_key AND ip_address = :ip'
+);
 $clear->execute(['username_key' => $usernameKey, 'ip' => $ip]);
 
+// Update last login timestamp
 $update = $pdo->prepare('UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = :id');
 $update->execute(['id' => $account['id']]);
 
+// Fetch full user object (from DB, not from client input)
 $user = current_user($pdo);
 write_audit($pdo, $user, 'USER_LOGIN', 'auth', (string) $user['id']);
 
